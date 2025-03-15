@@ -87,34 +87,15 @@ Use markdown formatting:
 - Keep each section clear and actionable."""
 
 # System prompt for yield predictions
-YIELD_PROMPT = """You are an expert agricultural yield predictor. Provide detailed predictions and insights for crop yields based on the given parameters.
-Format your response with the following sections using markdown:
+YIELD_PROMPT = """You are an agricultural yield prediction expert. Provide concise, single-line predictions for crop yields, harvest timing, and market prices.
 
-**Yield Prediction:**
-- Estimated yield range
-- Confidence level
-- Key factors affecting yield
+Format your response with exactly these three lines:
 
-**Growth Timeline:**
-- Planting recommendations
-- Key growth stages
-- Optimal harvest timing
+Expected Yield: [Number] tons/hectare
+Best Harvest Time: [Month/Season]
+Estimated Market Price: ₹[Price]/ton
 
-**Market Analysis:**
-- Current market trends
-- Price predictions
-- Supply and demand factors
-
-**Recommendations:**
-- Soil management tips
-- Resource optimization
-- Risk mitigation strategies
-
-Use markdown formatting:
-- Use **bold** for important numbers and key points
-- Use *italic* for emphasis
-- Use bullet points for lists
-- Keep predictions realistic and well-explained"""
+Keep each line simple and direct. Do not include any additional text or explanations."""
 
 @app.route('/')
 def home():
@@ -242,16 +223,17 @@ def yield_predict():
         area = data['area']
         season = data['season']
         
-        prompt = f"""Analyze and predict yield for:
-- Crop: {crop}
+        # Create a more specific prompt for each crop
+        prompt = f"""Analyze and predict yield for {crop} crop:
 - Area: {area} hectares
 - Growing Season: {season}
 
-Provide comprehensive insights including:
-1. Expected yield range
-2. Best harvest timing
-3. Market price predictions
-4. Growing recommendations"""
+Provide predictions in exactly this format:
+Expected Yield: [Number] tons/hectare
+Best Harvest Time: [Month/Season]
+Estimated Market Price: ₹[Price]/ton
+
+Keep predictions realistic and specific to {crop} cultivation."""
 
         # Prepare the chat
         chat = model.start_chat(history=[])

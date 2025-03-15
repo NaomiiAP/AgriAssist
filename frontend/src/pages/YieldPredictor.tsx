@@ -125,14 +125,26 @@ export default function YieldPredictor() {
         }
 
         const data = await response.json();
+        console.log('AI Response:', data.response); // Debug log
         setAiResponse(data.response);
       } catch (error) {
+        console.error('Error:', error); // Debug log
         setError(error instanceof Error ? error.message : 'Failed to get predictions');
       }
     }
 
     setIsLoading(false);
   };
+
+  // Add debug logging for response parsing
+  useEffect(() => {
+    if (aiResponse) {
+      console.log('Parsing response:', aiResponse);
+      console.log('Yield match:', aiResponse.match(/Expected Yield: (.*?)(?:\n|$)/));
+      console.log('Time match:', aiResponse.match(/Best Harvest Time: (.*?)(?:\n|$)/));
+      console.log('Price match:', aiResponse.match(/Estimated Market Price: (.*?)(?:\n|$)/));
+    }
+  }, [aiResponse]);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
@@ -275,60 +287,50 @@ export default function YieldPredictor() {
               </form>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-lg">
-              {error ? (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative flex items-start">
-                  <AlertCircle className="h-5 w-5 mr-2 mt-0.5" />
-                  <span>{error}</span>
+            <div className="bg-gray-50 rounded-xl p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Predictions</h2>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-48">
+                  <Loader2 className="h-8 w-8 animate-spin text-green-600" />
                 </div>
-              ) : isLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+              ) : error ? (
+                <div className="flex items-center justify-center h-48 text-red-600">
+                  <AlertCircle className="h-8 w-8 mr-2" />
+                  {error}
                 </div>
-              ) : mode === 'ai' && aiResponse ? (
-                <div className="prose max-w-none">
-                  <ReactMarkdown
-                    components={{
-                      h1: ({ children }) => <h1 className="text-2xl font-bold mb-4">{children}</h1>,
-                      h2: ({ children }) => <h2 className="text-xl font-semibold mb-3">{children}</h2>,
-                      h3: ({ children }) => <h3 className="text-lg font-semibold mb-2">{children}</h3>,
-                      p: ({ children }) => <p className="text-gray-700 mb-4">{children}</p>,
-                      strong: ({ children }) => <strong className="font-bold text-gray-900">{children}</strong>,
-                      em: ({ children }) => <em className="text-gray-600">{children}</em>,
-                      ul: ({ children }) => <ul className="list-disc pl-4 mb-4 space-y-2">{children}</ul>,
-                      ol: ({ children }) => <ol className="list-decimal pl-4 mb-4 space-y-2">{children}</ol>,
-                      li: ({ children }) => <li className="text-gray-700">{children}</li>,
-                    }}
-                  >
-                    {aiResponse}
-                  </ReactMarkdown>
-                </div>
-              ) : (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Predictions</h2>
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
-                      <div>
-                        <p className="text-sm text-gray-600">Expected Yield</p>
-                        <p className="text-lg font-semibold">-- tons/hectare</p>
-                      </div>
+              ) : aiResponse ? (
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center text-gray-600 mb-2">
+                      <TrendingUp className="h-5 w-5 mr-2" />
+                      <span className="font-medium">Expected Yield</span>
                     </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-5 w-5 text-green-600 mr-2" />
-                      <div>
-                        <p className="text-sm text-gray-600">Best Harvest Time</p>
-                        <p className="text-lg font-semibold">--</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <DollarSign className="h-5 w-5 text-green-600 mr-2" />
-                      <div>
-                        <p className="text-sm text-gray-600">Estimated Market Price</p>
-                        <p className="text-lg font-semibold">$--/ton</p>
-                      </div>
+                    <div className="text-xl font-bold text-green-600">
+                      {aiResponse.split('\n').find(line => line.startsWith('Expected Yield:'))?.replace('Expected Yield:', '').trim() || 'N/A'}
                     </div>
                   </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center text-gray-600 mb-2">
+                      <Calendar className="h-5 w-5 mr-2" />
+                      <span className="font-medium">Best Harvest Time</span>
+                    </div>
+                    <div className="text-xl font-bold text-green-600">
+                      {aiResponse.split('\n').find(line => line.startsWith('Best Harvest Time:'))?.replace('Best Harvest Time:', '').trim() || 'N/A'}
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center text-gray-600 mb-2">
+                      <DollarSign className="h-5 w-5 mr-2" />
+                      <span className="font-medium">Estimated Market Price (₹/ton)</span>
+                    </div>
+                    <div className="text-xl font-bold text-green-600">
+                      {aiResponse.split('\n').find(line => line.startsWith('Estimated Market Price:'))?.replace('Estimated Market Price:', '').trim() || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 h-48 flex items-center justify-center">
+                  Select a crop and enter details to get predictions
                 </div>
               )}
             </div>
