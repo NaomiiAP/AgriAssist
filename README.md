@@ -73,9 +73,9 @@ AgriAssist enhances agricultural decision-making with technology, ensuring susta
 
 ## 👥 Team  
 
-- **[Naomi Pereira]**  
-- **[Ujwala K V]**  
-- **[Anushka Gupta]**  
+- **Naomi Pereira**  
+- **Ujwala K V**  
+- **Anushka Gupta**  
 
 📌 **IEMHacks 3.0 Submission** 🎯  
 
