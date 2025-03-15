@@ -87,12 +87,41 @@ export default function CropPredictor() {
   useEffect(() => {
     const loadModel = async () => {
       try {
-        // Load MobileNet model
-        const loadedModel = await mobilenet.load();
-        setModel(loadedModel);
+        // First, initialize TensorFlow.js backend
+        await tf.ready();
+        
+        try {
+          await tf.setBackend('webgl');
+        } catch (e) {
+          console.warn('WebGL backend not available, falling back to CPU:', e);
+          await tf.setBackend('cpu');
+        }
+
+        // Load MobileNet model with retries
+        let loadedModel = null;
+        let retries = 3;
+        
+        while (retries > 0 && !loadedModel) {
+          try {
+            loadedModel = await mobilenet.load();
+            break;
+          } catch (e) {
+            console.error(`Failed to load model, retries left: ${retries - 1}`, e);
+            retries--;
+            if (retries === 0) throw e;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+          }
+        }
+
+        if (loadedModel) {
+          console.log('Model loaded successfully');
+          setModel(loadedModel);
+        } else {
+          throw new Error('Failed to load model after retries');
+        }
       } catch (error) {
         console.error('Error loading model:', error);
-        setError('Failed to load AI model. Please refresh the page.');
+        setError('Failed to load AI model. Please check your internet connection and refresh the page. If the problem persists, try using a different browser.');
       }
     };
     loadModel();
