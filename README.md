@@ -1,9 +1,9 @@
-# 🌾 AgriGuard  
+# 🌾 AgriAssist 
 ### AI-Powered Smart Farming Assistant  
 
 🚀 *A project for **IEMHacks 3.0***  
 
-AgriGuard is an intelligent agricultural solution designed to assist farmers in diagnosing crop diseases, optimizing yield predictions, managing pests, and accessing a dedicated marketplace. By integrating AI-driven analysis with multilingual support, AgriGuard empowers farmers with real-time insights, ensuring better decision-making and improved productivity.  
+AgriAssist is an intelligent agricultural solution designed to assist farmers in diagnosing crop diseases, optimizing yield predictions, managing pests, and accessing a dedicated marketplace. By integrating AI-driven analysis with multilingual support, AgriGuard empowers farmers with real-time insights, ensuring better decision-making and improved productivity.  
 
 ---
 
@@ -17,7 +17,7 @@ Farmers often struggle with crop diseases, unpredictable yields, pest control, a
 - **🛒 Marketplace** – Farmers can list their crops for sale with detailed descriptions.  
 - **🐛 Pest Control Advisor** – Input crop, pest, and severity to get organic and chemical pest control recommendations.  
 
-AgriGuard enhances agricultural decision-making with technology, ensuring sustainable and profitable farming.  
+AgriAssist enhances agricultural decision-making with technology, ensuring sustainable and profitable farming.  
 
 ---
 
@@ -73,10 +73,10 @@ AgriGuard enhances agricultural decision-making with technology, ensuring sustai
 
 ## 👥 Team  
 
-- **[Your Name]**  
-- **[Team Member 2]**  
-- **[Team Member 3]**  
+- **Naomi Pereira**  
+- **Ujwala K V**  
+- **Anushka Gupta**  
 
 📌 **IEMHacks 3.0 Submission** 🎯  
 
-🚀 *AgriGuard empowers farmers with AI-driven insights, ensuring smarter farming decisions and a more profitable agricultural ecosystem!* 🌾🚜  
+🚀 *AgriAssist empowers farmers with AI-driven insights, ensuring smarter farming decisions and a more profitable agricultural ecosystem!* 🌾🚜  
