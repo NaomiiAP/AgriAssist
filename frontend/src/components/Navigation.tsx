@@ -3,11 +3,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, MessageSquare, TrendingUp, Store, Bug, Plane, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import AuthModal from './AuthModal';
+import { User } from '@supabase/supabase-js';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 

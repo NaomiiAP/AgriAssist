@@ -30,8 +30,9 @@ else:
 # Initialize the Gemini model
 model = genai.GenerativeModel('gemini-2.0-flash')
 
-# System prompt for agricultural context
-SYSTEM_PROMPT = """You are AgriAssist, an AI assistant specialized in agriculture. 
+# System prompts for different languages
+SYSTEM_PROMPTS = {
+    'en': """You are AgriAssist, an AI assistant specialized in agriculture. 
 You provide helpful information about farming, crop management, weather impacts, 
 and agricultural best practices. Keep your responses concise, practical, and focused 
 on agricultural topics. If the question is not related to agriculture, politely redirect 
@@ -41,20 +42,28 @@ Use markdown formatting in your responses:
 - Use **bold** for important terms and key points
 - Use *italic* for emphasis
 - Use lists (both ordered and unordered) for steps and recommendations
-- Use `code` formatting for technical terms
-- Use proper spacing between paragraphs
+- Use proper spacing between paragraphs""",
 
-Example format:
-**Important:** Key point here
-*Note:* Additional information
+    'hi': """मैं AgriAssist हूं, कृषि में विशेषज्ञ एक AI सहायक।
+मैं खेती, फसल प्रबंधन, मौसम प्रभाव और कृषि सर्वोत्तम प्रथाओं के बारे में जानकारी प्रदान करता हूं।
+मेरे जवाब संक्षिप्त, व्यावहारिक और कृषि विषयों पर केंद्रित होंगे।
 
-1. First step
-2. Second step
-3. Third step
+अपने उत्तरों में मैं इस तरह का प्रारूप उपयोग करूंगा:
+- **बोल्ड** महत्वपूर्ण शब्दों के लिए
+- *इटैलिक* जोर देने के लिए
+- क्रमबद्ध और अक्रमबद्ध सूचियों का उपयोग
+- पैराग्राफ के बीच उचित स्पेसिंग""",
 
-- Bullet point
-- Another point
-- Final point"""
+    'bn': """আমি AgriAssist, কৃষি বিশেষজ্ঞ AI সহকারী।
+আমি কৃষি, ফসল পরিচালনা, আবহাওয়ার প্রভাব এবং কৃষি সর্বোত্তম অনুশীলন সম্পর্কে তথ্য প্রদান করি।
+আমার উত্তরগুলি সংক্ষিপ্ত, ব্যবহারিক এবং কৃষি বিষয়ে কেন্দ্রীভূত হবে।
+
+আমার উত্তরে আমি এই ফরম্যাট ব্যবহার করব:
+- **বোল্ড** গুরুত্বপূর্ণ শব্দের জন্য
+- *ইটালিক* জোর দেওয়ার জন্য
+- ক্রমানুসারে এবং ক্রমবিহীন তালিকা ব্যবহার
+- অনুচ্ছেদের মধ্যে উপযুক্ত স্পেসিং"""
+}
 
 # System prompt for pest advice
 PEST_PROMPT = """You are an expert agricultural pest control advisor. Provide detailed, practical advice for managing pests in crops.
@@ -129,13 +138,20 @@ def chat():
             }), 400
 
         user_message = data['message']
-        logger.info(f"Processing message: {user_message}")
+        language = data.get('language', 'en')  # Default to English if no language specified
+        
+        logger.info(f"Processing message in {language}: {user_message}")
         
         # Prepare the chat
         chat = model.start_chat(history=[])
         
-        # Send system prompt first
-        chat.send_message(SYSTEM_PROMPT)
+        # Send system prompt in selected language
+        system_prompt = SYSTEM_PROMPTS.get(language, SYSTEM_PROMPTS['en'])
+        chat.send_message(system_prompt)
+        
+        # Add language instruction to the message
+        if language != 'en':
+            user_message = f"Respond in {language} language: {user_message}"
         
         # Get response from Gemini
         response = chat.send_message(user_message)
@@ -302,6 +318,29 @@ def analyze_crop():
         return jsonify({
             "error": "Internal Server Error",
             "message": str(e)
+        }), 500
+
+@app.route('/test-api-key', methods=['GET'])
+def test_api_key():
+    try:
+        logger.info("Testing API key...")
+        
+        # Try to initialize a chat with Gemini
+        chat = model.start_chat(history=[])
+        
+        # Send a simple test message
+        response = chat.send_message("Hello, this is a test message.")
+        
+        return jsonify({
+            "status": "success",
+            "message": "API key is valid and working",
+            "test_response": response.text
+        })
+    except Exception as e:
+        logger.error(f"API key test failed: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": f"API key test failed: {str(e)}"
         }), 500
 
 @app.errorhandler(404)

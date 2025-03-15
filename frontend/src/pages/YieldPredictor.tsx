@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TrendingUp, Calendar, DollarSign, Loader2, AlertCircle, MapPin, Crosshair } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
