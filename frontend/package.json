@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/leaflet": "^1.9.16",
     "jspdf": "^3.0.0",
     "leaflet": "^1.9.4",

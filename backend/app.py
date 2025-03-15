@@ -97,6 +97,7 @@ Estimated Market Price: ₹[Price]/ton
 
 Keep each line simple and direct. Do not include any additional text or explanations."""
 
+
 @app.route('/')
 def home():
     logger.info("Home endpoint accessed")
@@ -252,6 +253,52 @@ Keep predictions realistic and specific to {crop} cultivation."""
 
     except Exception as e:
         logger.error(f"Error in yield prediction endpoint: {str(e)}")
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e)
+        }), 500
+
+@app.route('/analyze-crop', methods=['POST'])
+def analyze_crop():
+    try:
+        logger.info("Crop analysis endpoint accessed")
+        data = request.get_json()
+        logger.debug(f"Received data: {data}")
+        
+        if not data or 'image' not in data:
+            logger.warning("No image data in request")
+            return jsonify({
+                "error": "Bad Request",
+                "message": "Image data is required"
+            }), 400
+
+        # Prepare the chat
+        chat = model.start_chat(history=[])
+        
+        # Send system prompt first
+        chat.send_message(DISEASE_PROMPT)
+        
+        # Get response from Gemini
+        response = chat.send_message(data['image'])
+        logger.info("Successfully got response from Gemini")
+        
+        # Parse the response into structured data
+        response_text = response.text
+        disease = response_text.split('Disease:')[1].split('\n')[0].strip() if 'Disease:' in response_text else "Unknown"
+        confidence = response_text.split('Confidence:')[1].split('\n')[0].strip() if 'Confidence:' in response_text else "N/A"
+        treatment = response_text.split('Treatment:')[1].split('Prevention:')[0].strip() if 'Treatment:' in response_text else "No treatment information available"
+        prevention = response_text.split('Prevention:')[1].strip() if 'Prevention:' in response_text else "No prevention information available"
+        
+        return jsonify({
+            "disease": disease,
+            "confidence": confidence,
+            "treatment": treatment,
+            "prevention": prevention,
+            "status": "success"
+        })
+
+    except Exception as e:
+        logger.error(f"Error in crop analysis endpoint: {str(e)}")
         return jsonify({
             "error": "Internal Server Error",
             "message": str(e)
