@@ -6,13 +6,9 @@ import {
   CheckCircle,
   Leaf,
   TrendingUp,
-  Droplets,
   MessageSquareText,
-  Cloud,
   Store,
-  Users,
   Bug,
-  BarChart3
 } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
 import { supabase } from '../lib/supabase';
@@ -90,10 +86,10 @@ export default function Home() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-3xl">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              AI-Powered Crop Scanner: Diagnose, Predict, and Prosper!
+              AgriAssist - Your AI Companion for Smarter Farming
             </h1>
             <p className="text-xl text-gray-200 mb-8">
-              Upload a picture of your crop and get instant AI insights on diseases, pests, yield, and irrigation.
+            An all-in-one AI-powered platform that helps farmers with crop disease detection, yield prediction, a multilingual voice-enabled chatbot, a marketplace, and pest control solutions.
             </p>
             <button 
               onClick={handleGetStarted}
@@ -159,41 +155,25 @@ export default function Home() {
               title="Yield & Price Predictor"
               description="Forecast production & find the best time to sell."
             />
-            <FeatureCard
-              icon={Droplets}
-              title="Smart Irrigation Manager"
-              description="AI-driven water scheduling for healthier plants."
-            />
+            
             <FeatureCard
               icon={MessageSquareText}
               title="AgriChat Assistant"
               description="Ask farming-related questions & get AI-powered answers."
             />
-            <FeatureCard
-              icon={Cloud}
-              title="Hyperlocal Weather Alerts"
-              description="Get real-time updates on storms & droughts."
-            />
+            
             <FeatureCard
               icon={Store}
               title="Direct Farmer-to-Buyer Marketplace"
               description="Sell produce at fair prices."
             />
-            <FeatureCard
-              icon={Users}
-              title="Farming Community Hub"
-              description="Connect with other farmers & experts."
-            />
+           
             <FeatureCard
               icon={Bug}
               title="AI Pest & Fertilizer Advisor"
               description="Get the best eco-friendly crop treatments."
             />
-            <FeatureCard
-              icon={BarChart3}
-              title="Farm Analytics Dashboard"
-              description="See your farm's health, water usage & profit trends."
-            />
+           
           </div>
         </div>
       </div>
