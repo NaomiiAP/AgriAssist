@@ -154,20 +154,18 @@ export default function PestAdvisor() {
                       </h3>
                       <ReactMarkdown
                         components={{
-                          p: ({ children }) => <p className="text-gray-700 mb-2">{children}</p>,
+                          p: ({ children }) => <p className="text-gray-700 mb-1">{children}</p>,
                           strong: ({ children }) => <strong className="font-bold text-green-800">{children}</strong>,
                           em: ({ children }) => <em className="italic text-gray-600">{children}</em>,
-                          ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
-                          li: ({ children }) => <li className="text-gray-700">{children}</li>,
-                          code: ({ children }) => <code className="bg-gray-100 rounded px-1.5 py-0.5 text-sm">{children}</code>,
-                          pre: ({ children }) => <pre className="bg-gray-100 rounded p-3 mb-2 overflow-x-auto text-sm">{children}</pre>,
+                          ul: ({ children }) => <ul className="list-disc pl-4 mb-1 space-y-0.5">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-1 space-y-0.5">{children}</ol>,
+                          li: ({ children }) => <li className="text-gray-700 text-sm">{children}</li>,
                         }}
                       >
                         {advice.split(/(?=\*\*Immediate Control Measures:|Control Measures:)/).filter(section => 
                           section.toLowerCase().includes('immediate control measures:') ||
                           section.toLowerCase().includes('control measures:')
-                        ).join('\n')}
+                        ).join('\n').replace(/\*\*/g, '').split('\n').slice(0, 5).join('\n')}
                       </ReactMarkdown>
                     </div>
 
@@ -178,20 +176,18 @@ export default function PestAdvisor() {
                       </h3>
                       <ReactMarkdown
                         components={{
-                          p: ({ children }) => <p className="text-gray-700 mb-2">{children}</p>,
+                          p: ({ children }) => <p className="text-gray-700 mb-1">{children}</p>,
                           strong: ({ children }) => <strong className="font-bold text-green-800">{children}</strong>,
                           em: ({ children }) => <em className="italic text-gray-600">{children}</em>,
-                          ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
-                          li: ({ children }) => <li className="text-gray-700">{children}</li>,
-                          code: ({ children }) => <code className="bg-gray-100 rounded px-1.5 py-0.5 text-sm">{children}</code>,
-                          pre: ({ children }) => <pre className="bg-gray-100 rounded p-3 mb-2 overflow-x-auto text-sm">{children}</pre>,
+                          ul: ({ children }) => <ul className="list-disc pl-4 mb-1 space-y-0.5">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-1 space-y-0.5">{children}</ol>,
+                          li: ({ children }) => <li className="text-gray-700 text-sm">{children}</li>,
                         }}
                       >
                         {advice.split(/(?=\*\*Preventive Strategies:|Prevention:)/).filter(section => 
                           section.toLowerCase().includes('preventive strategies:') ||
                           section.toLowerCase().includes('prevention:')
-                        ).join('\n')}
+                        ).join('\n').replace(/\*\*/g, '').split('\n').slice(0, 5).join('\n')}
                       </ReactMarkdown>
                     </div>
 
@@ -202,20 +198,18 @@ export default function PestAdvisor() {
                       </h3>
                       <ReactMarkdown
                         components={{
-                          p: ({ children }) => <p className="text-gray-700 mb-2">{children}</p>,
+                          p: ({ children }) => <p className="text-gray-700 mb-1">{children}</p>,
                           strong: ({ children }) => <strong className="font-bold text-green-800">{children}</strong>,
                           em: ({ children }) => <em className="italic text-gray-600">{children}</em>,
-                          ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
-                          li: ({ children }) => <li className="text-gray-700">{children}</li>,
-                          code: ({ children }) => <code className="bg-gray-100 rounded px-1.5 py-0.5 text-sm">{children}</code>,
-                          pre: ({ children }) => <pre className="bg-gray-100 rounded p-3 mb-2 overflow-x-auto text-sm">{children}</pre>,
+                          ul: ({ children }) => <ul className="list-disc pl-4 mb-1 space-y-0.5">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-1 space-y-0.5">{children}</ol>,
+                          li: ({ children }) => <li className="text-gray-700 text-sm">{children}</li>,
                         }}
                       >
                         {advice.split(/(?=\*\*Treatment Schedule:|Schedule:)/).filter(section => 
                           section.toLowerCase().includes('treatment schedule:') ||
                           section.toLowerCase().includes('schedule:')
-                        ).join('\n')}
+                        ).join('\n').replace(/\*\*/g, '').split('\n').slice(0, 4).join('\n')}
                       </ReactMarkdown>
                     </div>
 
@@ -226,20 +220,18 @@ export default function PestAdvisor() {
                       </h3>
                       <ReactMarkdown
                         components={{
-                          p: ({ children }) => <p className="text-gray-700 mb-2">{children}</p>,
+                          p: ({ children }) => <p className="text-gray-700 mb-1">{children}</p>,
                           strong: ({ children }) => <strong className="font-bold text-green-800">{children}</strong>,
                           em: ({ children }) => <em className="italic text-gray-600">{children}</em>,
-                          ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
-                          li: ({ children }) => <li className="text-gray-700">{children}</li>,
-                          code: ({ children }) => <code className="bg-gray-100 rounded px-1.5 py-0.5 text-sm">{children}</code>,
-                          pre: ({ children }) => <pre className="bg-gray-100 rounded p-3 mb-2 overflow-x-auto text-sm">{children}</pre>,
+                          ul: ({ children }) => <ul className="list-disc pl-4 mb-1 space-y-0.5">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal pl-4 mb-1 space-y-0.5">{children}</ol>,
+                          li: ({ children }) => <li className="text-gray-700 text-sm">{children}</li>,
                         }}
                       >
                         {advice.split(/(?=\*\*Safety Precautions:|Safety:)/).filter(section => 
                           section.toLowerCase().includes('safety precautions:') ||
                           section.toLowerCase().includes('safety:')
-                        ).join('\n')}
+                        ).join('\n').replace(/\*\*/g, '').split('\n').slice(0, 4).join('\n')}
                       </ReactMarkdown>
                     </div>
                   </div>

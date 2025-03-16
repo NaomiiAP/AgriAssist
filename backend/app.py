@@ -4,6 +4,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 import logging
+from typing import Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -18,6 +19,10 @@ CORS(app)
 # Basic configuration
 app.config['JSON_SORT_KEYS'] = False
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+
+# In-memory storage for marketplace items (replace with database in production)
+marketplace_items: Dict[int, dict] = {}
+next_item_id = 1
 
 # Configure Gemini AI
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
@@ -66,34 +71,27 @@ Use markdown formatting in your responses:
 }
 
 # System prompt for pest advice
-PEST_PROMPT = """You are an expert agricultural pest control advisor. Provide detailed, practical advice for managing pests in crops.
+PEST_PROMPT = """You are an expert agricultural pest control advisor. Provide concise, practical advice for managing pests in crops.
 Focus on organic and sustainable solutions when possible. Format your response with the following sections using markdown:
 
 **Immediate Control Measures:**
-- List immediate actions to control the pest
+- List 3-4 key actions to control the pest
 - Focus on organic solutions first
-- Include both chemical and non-chemical options
 
 **Preventive Strategies:**
-- Long-term prevention methods
-- Cultural practices
-- Environmental modifications
+- List 3-4 essential prevention methods
+- Focus on practical, easy-to-implement solutions
 
 **Treatment Schedule:**
-- Timing of applications
-- Frequency of treatments
-- Duration of control measures
+- Key timing points
+- Frequency of applications
+- Duration
 
 **Safety Precautions:**
-- Personal protective equipment
-- Environmental considerations
-- Safe handling practices
+- Essential safety measures
+- Key environmental considerations
 
-Use markdown formatting:
-- Use **bold** for important terms
-- Use *italic* for emphasis
-- Use bullet points for lists
-- Keep each section clear and actionable."""
+Keep each section brief and actionable. Use bullet points for clarity."""
 
 # System prompt for yield predictions
 YIELD_PROMPT = """You are an agricultural yield prediction expert. Provide concise, single-line predictions for crop yields, harvest timing, and market prices.
@@ -341,6 +339,130 @@ def test_api_key():
         return jsonify({
             "status": "error",
             "message": f"API key test failed: {str(e)}"
+        }), 500
+
+@app.route('/marketplace/items', methods=['GET'])
+def get_marketplace_items():
+    try:
+        logger.info("Fetching marketplace items")
+        items = list(marketplace_items.values())
+        return jsonify({
+            "status": "success",
+            "items": items
+        })
+    except Exception as e:
+        logger.error(f"Error fetching marketplace items: {str(e)}")
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e)
+        }), 500
+
+@app.route('/marketplace/items', methods=['POST'])
+def add_marketplace_item():
+    try:
+        logger.info("Adding new marketplace item")
+        data = request.get_json()
+        
+        if not data or not all(k in data for k in ['name', 'price', 'category', 'seller']):
+            return jsonify({
+                "error": "Bad Request",
+                "message": "Missing required fields"
+            }), 400
+
+        global next_item_id
+        new_item = {
+            "id": next_item_id,
+            "name": data['name'],
+            "description": data.get('description', ''),
+            "price": float(data['price']),
+            "category": data['category'],
+            "seller": data['seller'],
+            "created_at": "2024-03-20"  # In production, use actual timestamp
+        }
+        
+        marketplace_items[next_item_id] = new_item
+        next_item_id += 1
+        
+        logger.info(f"Successfully added item with ID: {new_item['id']}")
+        return jsonify({
+            "status": "success",
+            "item": new_item
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Error adding marketplace item: {str(e)}")
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e)
+        }), 500
+
+@app.route('/marketplace/items/<int:item_id>', methods=['PUT'])
+def update_marketplace_item(item_id: int):
+    try:
+        logger.info(f"Updating marketplace item with ID: {item_id}")
+        data = request.get_json()
+        
+        if item_id not in marketplace_items:
+            return jsonify({
+                "error": "Not Found",
+                "message": f"Item with ID {item_id} not found"
+            }), 404
+            
+        if not data or not all(k in data for k in ['name', 'price', 'category', 'seller']):
+            return jsonify({
+                "error": "Bad Request",
+                "message": "Missing required fields"
+            }), 400
+
+        updated_item = {
+            "id": item_id,
+            "name": data['name'],
+            "description": data.get('description', marketplace_items[item_id]['description']),
+            "price": float(data['price']),
+            "category": data['category'],
+            "seller": data['seller'],
+            "created_at": marketplace_items[item_id]['created_at']
+        }
+        
+        marketplace_items[item_id] = updated_item
+        
+        logger.info(f"Successfully updated item with ID: {item_id}")
+        return jsonify({
+            "status": "success",
+            "item": updated_item
+        })
+        
+    except Exception as e:
+        logger.error(f"Error updating marketplace item: {str(e)}")
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e)
+        }), 500
+
+@app.route('/marketplace/items/<int:item_id>', methods=['DELETE'])
+def delete_marketplace_item(item_id: int):
+    try:
+        logger.info(f"Deleting marketplace item with ID: {item_id}")
+        
+        if item_id not in marketplace_items:
+            return jsonify({
+                "error": "Not Found",
+                "message": f"Item with ID {item_id} not found"
+            }), 404
+            
+        del marketplace_items[item_id]
+        
+        logger.info(f"Successfully deleted item with ID: {item_id}")
+        return jsonify({
+            "status": "success",
+            "message": f"Item with ID {item_id} deleted successfully"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error deleting marketplace item: {str(e)}")
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e)
         }), 500
 
 @app.errorhandler(404)

@@ -109,7 +109,7 @@ export default function Home() {
       <div className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">
-            How AgriSense Works
+            How AgriAssist Works
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <StepCard
@@ -146,7 +146,7 @@ export default function Home() {
       <div className="py-20 bg-gray-50">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">
-            Why Choose AgriSense?
+            Why Choose AgriAssist?
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard

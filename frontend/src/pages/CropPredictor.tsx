@@ -252,12 +252,12 @@ export default function CropPredictor() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16">
+      <div className="max-w-5xl mx-auto p-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl mt-10 font-bold text-gray-800 mb-4">
-          Crop Disease Predictor
-        </h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            Crop Disease Predictor
+          </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Upload a photo of your crop to get instant AI-powered disease detection and treatment recommendations.
           </p>
@@ -360,7 +360,6 @@ export default function CropPredictor() {
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">Disease Detected</h3>
                   <div className="space-y-2">
                     <p className="text-2xl font-bold text-green-600">{prediction.disease}</p>
-                    <p className="text-sm text-gray-500">Confidence: {prediction.confidence}</p>
                   </div>
                 </div>
                 

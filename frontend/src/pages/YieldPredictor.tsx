@@ -16,7 +16,6 @@ export default function YieldPredictor() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
-  const [mode, setMode] = useState<'simple' | 'ai'>('simple');
   const [location, setLocation] = useState<Location | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const mapRef = useRef<L.Map | null>(null);
@@ -100,36 +99,34 @@ export default function YieldPredictor() {
     setIsLoading(true);
     setError(null);
 
-    if (mode === 'ai') {
-      try {
-        const response = await fetch('http://localhost:5000/yield-predict', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            crop,
-            area,
-            season,
-            location: location ? {
-              latitude: location.lat,
-              longitude: location.lng,
-              address: location.address
-            } : undefined
-          }),
-        });
+    try {
+      const response = await fetch('http://localhost:5000/yield-predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          crop,
+          area,
+          season,
+          location: location ? {
+            latitude: location.lat,
+            longitude: location.lng,
+            address: location.address
+          } : undefined
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error('Failed to get predictions');
-        }
-
-        const data = await response.json();
-        console.log('AI Response:', data.response); // Debug log
-        setAiResponse(data.response);
-      } catch (error) {
-        console.error('Error:', error); // Debug log
-        setError(error instanceof Error ? error.message : 'Failed to get predictions');
+      if (!response.ok) {
+        throw new Error('Failed to get predictions');
       }
+
+      const data = await response.json();
+      console.log('AI Response:', data.response); // Debug log
+      setAiResponse(data.response);
+    } catch (error) {
+      console.error('Error:', error); // Debug log
+      setError(error instanceof Error ? error.message : 'Failed to get predictions');
     }
 
     setIsLoading(false);
@@ -149,33 +146,9 @@ export default function YieldPredictor() {
     <div className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-4xl mx-auto p-4">
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-green-600 mr-3" />
-              <h1 className="text-3xl font-bold text-gray-800">Yield & Price Predictor</h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setMode('simple')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  mode === 'simple'
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Simple
-              </button>
-              <button
-                onClick={() => setMode('ai')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  mode === 'ai'
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                AI Analysis
-              </button>
-            </div>
+          <div className="flex items-center mb-6">
+            <TrendingUp className="h-8 w-8 text-green-600 mr-3" />
+            <h1 className="text-3xl font-bold text-gray-800">Yield & Price Predictor</h1>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -185,22 +158,14 @@ export default function YieldPredictor() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Crop Type
                   </label>
-                  <select
+                  <input
+                    type="text"
                     value={crop}
                     onChange={(e) => setCrop(e.target.value)}
+                    placeholder="Enter your crop type (e.g., wheat, rice, corn)"
                     className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                     disabled={isLoading}
-                  >
-                    <option value="">Select a crop</option>
-                    <option value="rice">Rice</option>
-                    <option value="wheat">Wheat</option>
-                    <option value="corn">Corn</option>
-                    <option value="soybean">Soybean</option>
-                    <option value="potato">Potato</option>
-                    <option value="tomato">Tomato</option>
-                    <option value="cotton">Cotton</option>
-                    <option value="sugarcane">Sugarcane</option>
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -242,7 +207,7 @@ export default function YieldPredictor() {
                     Location
                   </label>
                   <div className="space-y-3">
-                    <div id="map" className="h-48 rounded-lg border"></div>
+                    <div id="map" className="h-48 rounded-lg border relative z-0"></div>
                     <div className="flex items-center space-x-2">
                       <button
                         type="button"
@@ -260,9 +225,9 @@ export default function YieldPredictor() {
                         )}
                       </button>
                       {location && (
-                        <div className="flex-1 flex items-center text-sm text-gray-600">
-                          <MapPin className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="truncate">{location.address}</span>
+                        <div className="flex-1 flex items-start text-sm text-gray-600 min-h-[6rem]">
+                          <MapPin className="h-4 w-4 text-green-600 mr-1 mt-1 flex-shrink-0" />
+                          <span className="break-words line-clamp-6">{location.address}</span>
                         </div>
                       )}
                     </div>

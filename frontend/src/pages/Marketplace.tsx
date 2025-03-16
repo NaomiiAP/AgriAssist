@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Store, Package, Truck, IndianRupee, Pencil, PlusCircle, X, Search } from "lucide-react";
+import axios from 'axios';
 
 interface Crop {
   id: number;
@@ -11,30 +12,30 @@ interface Crop {
   image: string;
 }
 
-export default function Marketplace() {
-  const [crops, setCrops] = useState<Crop[]>([
-    {
-      id: 1,
-      crop: "Organic Tomatoes",
-      quantity: "500 kg",
-      price: "₹200/kg",
-      location: "Green Valley Farm",
-      delivery: "Available",
-      image:
-        "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&q=80",
-    },
-    {
-      id: 2,
-      crop: "Fresh Corn",
-      quantity: "1000 kg",
-      price: "₹150/kg",
-      location: "Sunrise Farms",
-      delivery: "Pickup only",
-      image:
-        "https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&q=80",
-    },
-  ]);
+interface MarketplaceItem {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  seller: string;
+  created_at: string;
+}
 
+interface ApiResponse {
+  status: string;
+  items?: MarketplaceItem[];
+  item?: MarketplaceItem;
+  error?: string;
+  message?: string;
+}
+
+const API_BASE_URL = 'http://localhost:5000';
+
+export default function Marketplace() {
+  const [crops, setCrops] = useState<Crop[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [editListing, setEditListing] = useState<Crop | null>(null);
   const [newCrop, setNewCrop] = useState<Crop>({
@@ -49,6 +50,46 @@ export default function Marketplace() {
 
   const [imageData, setImageData] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
+
+  // Fetch crops from backend
+  useEffect(() => {
+    fetchCrops();
+  }, []);
+
+  const fetchCrops = async () => {
+    try {
+      console.log('Fetching crops from:', `${API_BASE_URL}/marketplace/items`);
+      const response = await axios.get<ApiResponse>(`${API_BASE_URL}/marketplace/items`);
+      console.log('Response received:', response.data);
+      
+      if (response.data.items) {
+        const transformedCrops = response.data.items.map((item) => ({
+          id: item.id,
+          crop: item.name,
+          quantity: "1 unit", // Default value since backend doesn't have quantity
+          price: `₹${item.price}`,
+          location: item.seller || "Anonymous",
+          delivery: "Available",
+          image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80" // Default image
+        }));
+        setCrops(transformedCrops);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching crops:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: any; status?: number } };
+        console.error('Error details:', {
+          message: errorMessage,
+          response: axiosError.response?.data,
+          status: axiosError.response?.status
+        });
+      }
+      setError(`Failed to fetch marketplace items: ${errorMessage}`);
+      setLoading(false);
+    }
+  };
 
   // Handle search input
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,21 +114,43 @@ export default function Marketplace() {
   };
 
   // Add crop to marketplace
-  const addCrop = () => {
+  const addCrop = async () => {
     if (!newCrop.crop || !newCrop.quantity || !newCrop.price || !newCrop.location) {
       alert("Please fill all required fields.");
       return;
     }
 
-    // Use a placeholder image if none is provided
-    const cropToAdd = {
-      ...newCrop,
-      id: Date.now(),
-      image: newCrop.image || "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80"
-    };
-    
-    setCrops([...crops, cropToAdd]);
-    resetForm();
+    try {
+      // Transform frontend data to match backend structure
+      const backendData = {
+        name: newCrop.crop,
+        description: `${newCrop.quantity} available at ${newCrop.location}`,
+        price: parseFloat(newCrop.price.replace('₹', '')),
+        category: "crops",
+        seller: newCrop.location
+      };
+
+      const response = await axios.post<ApiResponse>(`${API_BASE_URL}/marketplace/items`, backendData);
+      
+      if (response.data.item) {
+        // Transform backend response to match frontend structure
+        const newItem = {
+          id: response.data.item.id,
+          crop: response.data.item.name,
+          quantity: newCrop.quantity,
+          price: newCrop.price,
+          location: newCrop.location,
+          delivery: newCrop.delivery,
+          image: newCrop.image || "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80"
+        };
+
+        setCrops([...crops, newItem]);
+        resetForm();
+      }
+    } catch (err) {
+      console.error('Error adding crop:', err);
+      setError("Failed to add new crop");
+    }
   };
 
   // Reset the form
@@ -112,10 +175,27 @@ export default function Marketplace() {
   };
 
   // Save edited details
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editListing) return;
-    setCrops(crops.map((crop) => (crop.id === editListing.id ? editListing : crop)));
-    setEditListing(null);
+
+    try {
+      // Transform frontend data to match backend structure
+      const backendData = {
+        name: editListing.crop,
+        description: `${editListing.quantity} available at ${editListing.location}`,
+        price: parseFloat(editListing.price.replace('₹', '')),
+        category: "crops",
+        seller: editListing.location
+      };
+
+      await axios.put(`${API_BASE_URL}/marketplace/items/${editListing.id}`, backendData);
+      
+      setCrops(crops.map((crop) => (crop.id === editListing.id ? editListing : crop)));
+      setEditListing(null);
+    } catch (err) {
+      console.error('Error updating crop:', err);
+      setError("Failed to update crop details");
+    }
   };
 
   // Filter crops based on search query
@@ -123,28 +203,44 @@ export default function Marketplace() {
     crop.crop.toLowerCase().includes(searchQuery)
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-16 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-16 flex items-center justify-center">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-7xl mx-auto p-4">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <div className="flex items-center">
             <Store className="h-8 w-8 text-green-600 mr-3" />
             <h1 className="text-3xl font-bold text-gray-800">Farmer's Marketplace</h1>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex flex-col md:flex-row md:items-center md:space-x-4 gap-4">
             <div className="relative">
               <input
                 type="text"
                 placeholder="Search crops..."
                 value={searchQuery}
                 onChange={handleSearch}
-                className="border rounded-lg px-4 py-2 pr-10 w-72"
+                className="border rounded-lg px-4 py-2 pr-10 w-full md:w-72"
               />
               <Search className="absolute right-3 top-3 h-5 w-5 text-gray-500" />
             </div>
             <button
               onClick={() => setShowModal(true)}
-              className="flex items-center bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center justify-center bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors w-full md:w-auto"
             >
               <PlusCircle className="h-5 w-5 mr-2" /> Add Crop
             </button>
