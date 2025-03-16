@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { TrendingUp, Calendar, DollarSign, Loader2, AlertCircle, MapPin, Crosshair } from 'lucide-react';
+import { TrendingUp, Calendar, DollarSign, Loader2, AlertCircle, MapPin, Crosshair, IndianRupee } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -284,7 +284,7 @@ export default function YieldPredictor() {
                   </div>
                   <div className="bg-white rounded-lg p-4 shadow-sm">
                     <div className="flex items-center text-gray-600 mb-2">
-                      <DollarSign className="h-5 w-5 mr-2" />
+                      <IndianRupee className="h-5 w-5 mr-2" />
                       <span className="font-medium">Estimated Market Price (₹/ton)</span>
                     </div>
                     <div className="text-xl font-bold text-green-600">
