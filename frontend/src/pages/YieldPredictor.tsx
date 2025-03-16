@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { TrendingUp, Calendar, DollarSign, Loader2, AlertCircle, MapPin, Crosshair, IndianRupee } from 'lucide-react';
+import { TrendingUp, Calendar, Loader2, AlertCircle, MapPin, Crosshair, IndianRupee } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -100,7 +100,7 @@ export default function YieldPredictor() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5000/yield-predict', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/yield-predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

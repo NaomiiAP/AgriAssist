@@ -130,7 +130,7 @@ export default function Chatbot() {
 
     try {
       console.log('Sending request to backend...');
-      const response = await fetch('http://localhost:5000/chat', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

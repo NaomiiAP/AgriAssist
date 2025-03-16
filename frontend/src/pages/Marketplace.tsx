@@ -30,7 +30,7 @@ interface ApiResponse {
   message?: string;
 }
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL
 
 export default function Marketplace() {
   const [crops, setCrops] = useState<Crop[]>([]);

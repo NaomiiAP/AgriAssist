@@ -22,7 +22,7 @@ export default function PestAdvisor() {
     setAdvice(null);
 
     try {
-      const response = await fetch('http://localhost:5000/pest-advice', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/pest-advice`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
