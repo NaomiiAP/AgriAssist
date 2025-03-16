@@ -100,7 +100,7 @@ export default function YieldPredictor() {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/yield-predict`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/yield-predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Store, Package, Truck, IndianRupee, Pencil, PlusCircle, X, Search } from "lucide-react";
+import { Store, Package, Truck, IndianRupee, PlusCircle, X, Search } from "lucide-react";
 import axios from 'axios';
 
 interface Crop {
@@ -30,47 +30,41 @@ interface ApiResponse {
   message?: string;
 }
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL
-
 export default function Marketplace() {
   const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [editListing, setEditListing] = useState<Crop | null>(null);
-  const [newCrop, setNewCrop] = useState<Crop>({
-    id: Date.now(),
-    crop: "",
-    quantity: "",
-    price: "",
-    location: "",
-    delivery: "Available",
-    image: "",
+  const [newCrop, setNewCrop] = useState<Partial<Crop>>({
+    crop: '',
+    quantity: '',
+    price: '',
+    location: '',
+    delivery: 'Available',
+    image: ''
   });
 
-  const [imageData, setImageData] = useState<string>("");
+  const [imageData, setImageData] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Fetch crops from backend
   useEffect(() => {
     fetchCrops();
   }, []);
 
   const fetchCrops = async () => {
     try {
-      console.log('Fetching crops from:', `${API_BASE_URL}/marketplace/items`);
-      const response = await axios.get<ApiResponse>(`${API_BASE_URL}/marketplace/items`);
-      console.log('Response received:', response.data);
+      const response = await axios.get<ApiResponse>(`${import.meta.env.VITE_BACKEND_URL}/marketplace/items`);
       
       if (response.data.items) {
         const transformedCrops = response.data.items.map((item) => ({
           id: item.id,
           crop: item.name,
-          quantity: "1 unit", // Default value since backend doesn't have quantity
+          quantity: "1 unit",
           price: `₹${item.price}`,
           location: item.seller || "Anonymous",
           delivery: "Available",
-          image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80" // Default image
+          image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80"
         }));
         setCrops(transformedCrops);
       }
@@ -78,108 +72,76 @@ export default function Marketplace() {
     } catch (err) {
       console.error('Error fetching crops:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: any; status?: number } };
-        console.error('Error details:', {
-          message: errorMessage,
-          response: axiosError.response?.data,
-          status: axiosError.response?.status
-        });
-      }
       setError(`Failed to fetch marketplace items: ${errorMessage}`);
       setLoading(false);
     }
   };
 
-  // Handle search input
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value.toLowerCase());
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value.toLowerCase());
   };
 
-  // Handle input changes for new crop
-  const handleNewCropChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setNewCrop({ ...newCrop, [event.target.name]: event.target.value });
+  const handleNewCropChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewCrop(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  // Handle image upload
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImageData(reader.result as string);
-        setNewCrop({ ...newCrop, image: reader.result as string });
+        setNewCrop(prev => ({
+          ...prev,
+          image: reader.result as string
+        }));
       };
-      reader.readAsDataURL(event.target.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 
-  // Add crop to marketplace
-  const addCrop = async () => {
+  const addCrop = () => {
     if (!newCrop.crop || !newCrop.quantity || !newCrop.price || !newCrop.location) {
-      alert("Please fill all required fields.");
+      alert('Please fill in all required fields');
       return;
     }
 
-    try {
-      // Transform frontend data to match backend structure
-      const backendData = {
-        name: newCrop.crop,
-        description: `${newCrop.quantity} available at ${newCrop.location}`,
-        price: parseFloat(newCrop.price.replace('₹', '')),
-        category: "crops",
-        seller: newCrop.location
-      };
-
-      const response = await axios.post<ApiResponse>(`${API_BASE_URL}/marketplace/items`, backendData);
-      
-      if (response.data.item) {
-        // Transform backend response to match frontend structure
-        const newItem = {
-          id: response.data.item.id,
-          crop: response.data.item.name,
-          quantity: newCrop.quantity,
-          price: newCrop.price,
-          location: newCrop.location,
-          delivery: newCrop.delivery,
-          image: newCrop.image || "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80"
-        };
-
-        setCrops([...crops, newItem]);
-        resetForm();
-      }
-    } catch (err) {
-      console.error('Error adding crop:', err);
-      setError("Failed to add new crop");
-    }
-  };
-
-  // Reset the form
-  const resetForm = () => {
-    setNewCrop({
+    const newCropWithId = {
+      ...newCrop,
       id: Date.now(),
-      crop: "",
-      quantity: "",
-      price: "",
-      location: "",
-      delivery: "Available",
-      image: ""
-    });
-    setImageData("");
-    setShowModal(false);
+      image: newCrop.image || "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80"
+    } as Crop;
+
+    setCrops(prev => [...prev, newCropWithId]);
+    resetForm();
   };
 
-  // Handle editing crop details
+  const resetForm = () => {
+    setShowModal(false);
+    setImageData(null);
+    setNewCrop({
+      crop: '',
+      quantity: '',
+      price: '',
+      location: '',
+      delivery: 'Available',
+      image: ''
+    });
+  };
+
   const handleEditChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!editListing) return;
     setEditListing({ ...editListing, [event.target.name]: event.target.value });
   };
 
-  // Save edited details
   const saveEdit = async () => {
     if (!editListing) return;
 
     try {
-      // Transform frontend data to match backend structure
       const backendData = {
         name: editListing.crop,
         description: `${editListing.quantity} available at ${editListing.location}`,
@@ -188,7 +150,7 @@ export default function Marketplace() {
         seller: editListing.location
       };
 
-      await axios.put(`${API_BASE_URL}/marketplace/items/${editListing.id}`, backendData);
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/marketplace/items/${editListing.id}`, backendData);
       
       setCrops(crops.map((crop) => (crop.id === editListing.id ? editListing : crop)));
       setEditListing(null);
@@ -198,7 +160,6 @@ export default function Marketplace() {
     }
   };
 
-  // Filter crops based on search query
   const filteredCrops = crops.filter((crop) =>
     crop.crop.toLowerCase().includes(searchQuery)
   );
@@ -247,7 +208,6 @@ export default function Marketplace() {
           </div>
         </div>
 
-        {/* Crop Listings */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCrops.map((listing) => (
             <div key={listing.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -313,105 +273,108 @@ export default function Marketplace() {
 
       {/* Add Crop Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Add New Crop</h2>
-              <button onClick={resetForm} className="text-gray-500 hover:text-gray-700">
-                <X className="h-5 w-5" />
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-lg w-full max-w-sm relative">
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-800">Add New Crop</h2>
+                <button 
+                  onClick={resetForm} 
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
             
-            <div className="space-y-4">
-              {/* Crop Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Crop Name *</label>
-                <input
-                  type="text"
-                  name="crop"
-                  value={newCrop.crop}
-                  onChange={handleNewCropChange}
-                  className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
-                  placeholder="e.g., Organic Tomatoes"
-                  required
-                />
+            <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Crop Name *</label>
+                  <input
+                    type="text"
+                    name="crop"
+                    value={newCrop.crop}
+                    onChange={handleNewCropChange}
+                    className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
+                    placeholder="e.g., Organic Tomatoes"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Quantity *</label>
+                  <input
+                    type="text"
+                    name="quantity"
+                    value={newCrop.quantity}
+                    onChange={handleNewCropChange}
+                    className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
+                    placeholder="e.g., 500 kg"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+                  <input
+                    type="text"
+                    name="price"
+                    value={newCrop.price}
+                    onChange={handleNewCropChange}
+                    className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
+                    placeholder="e.g., ₹200/kg"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Farm Location *</label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={newCrop.location}
+                    onChange={handleNewCropChange}
+                    className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
+                    placeholder="e.g., Green Valley Farm"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Option</label>
+                  <select
+                    name="delivery"
+                    value={newCrop.delivery}
+                    onChange={handleNewCropChange}
+                    className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
+                  >
+                    <option value="Available">Available</option>
+                    <option value="Pickup only">Pickup only</option>
+                    <option value="Delivery within 50km">Delivery within 50km</option>
+                    <option value="Free delivery above ₹5000">Free delivery above ₹5000</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
+                  />
+                  {imageData && (
+                    <div className="mt-2">
+                      <img src={imageData} alt="Preview" className="h-24 object-cover rounded" />
+                    </div>
+                  )}
+                </div>
               </div>
-              
-              {/* Quantity */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Quantity *</label>
-                <input
-                  type="text"
-                  name="quantity"
-                  value={newCrop.quantity}
-                  onChange={handleNewCropChange}
-                  className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
-                  placeholder="e.g., 500 kg"
-                  required
-                />
-              </div>
-              
-              {/* Price */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
-                <input
-                  type="text"
-                  name="price"
-                  value={newCrop.price}
-                  onChange={handleNewCropChange}
-                  className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
-                  placeholder="e.g., ₹200/kg"
-                  required
-                />
-              </div>
-              
-              {/* Location */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Farm Location *</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={newCrop.location}
-                  onChange={handleNewCropChange}
-                  className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
-                  placeholder="e.g., Green Valley Farm"
-                  required
-                />
-              </div>
-              
-              {/* Delivery Option */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Option</label>
-                <select
-                  name="delivery"
-                  value={newCrop.delivery}
-                  onChange={handleNewCropChange}
-                  className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
-                >
-                  <option value="Available">Available</option>
-                  <option value="Pickup only">Pickup only</option>
-                  <option value="Delivery within 50km">Delivery within 50km</option>
-                  <option value="Free delivery above ₹5000">Free delivery above ₹5000</option>
-                </select>
-              </div>
-              
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-600"
-                />
-                {imageData && (
-                  <div className="mt-2">
-                    <img src={imageData} alt="Preview" className="h-24 object-cover rounded" />
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex space-x-3 mt-6">
+            </div>
+
+            <div className="p-6 border-t bg-gray-50">
+              <div className="flex space-x-3">
                 <button
                   onClick={addCrop}
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
