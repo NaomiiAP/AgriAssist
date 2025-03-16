@@ -1,33 +1,33 @@
-# 🌾 AgriAssist 
+# 🌾 AgriAssist  
 ### AI-Powered Smart Farming Assistant  
 
 🚀 *A project for **IEMHacks 3.0***  
 
-AgriAssist is an intelligent agricultural solution designed to assist farmers in diagnosing crop diseases, optimizing yield predictions, managing pests, and accessing a dedicated marketplace. By integrating AI-driven analysis with multilingual support, AgriGuard empowers farmers with real-time insights, ensuring better decision-making and improved productivity.  
+AgriAssist is an intelligent agricultural solution designed to help farmers diagnose crop diseases, optimize yield predictions, manage pests, and access a dedicated marketplace. With AI-driven insights, a **voice-enabled multilingual chatbot**, and real-time analytics, AgriAssist empowers farmers to make informed decisions, ensuring better productivity and profitability.  
 
 ---
 
 ## 🚜 Project Overview  
 
-Farmers often struggle with crop diseases, unpredictable yields, pest control, and market access, leading to financial losses and reduced productivity. AgriGuard addresses these challenges with an *AI-powered, multilingual, and user-friendly* agricultural assistant that includes:  
+Farmers face challenges such as crop diseases, unpredictable yields, pest infestations, and difficulty in accessing markets, leading to financial losses. **AgriAssist** tackles these issues with an *AI-powered, voice-enabled, and user-friendly* agricultural assistant that includes:  
 
-- **📷 Crop Disease Detection** – Upload a crop image to identify diseases instantly.  
-- **🗣️ AI Chatbot** – Multilingual chatbot (Hindi, English, Bengali) for quick farming guidance.  
-- **🌱 Yield Predictor** – Get AI-generated analysis of expected yield, market price, and best harvest time.  
+- **📷 Crop Disease Detection** – Upload a crop image to detect diseases instantly.  
+- **🎙️ AI Voice Chatbot** – A **multilingual chatbot** (Hindi, English, Bengali) with text and voice support for quick farming assistance.  
+- **🌱 Yield Predictor** – AI-based analysis of **expected yield, market price, and best harvest time**.  
 - **🛒 Marketplace** – Farmers can list their crops for sale with detailed descriptions.  
-- **🐛 Pest Control Advisor** – Input crop, pest, and severity to get organic and chemical pest control recommendations.  
+- **🐛 Pest Control Advisor** – Provides organic and chemical pest control solutions based on crop type, pest, and severity.  
 
-AgriAssist enhances agricultural decision-making with technology, ensuring sustainable and profitable farming.  
+AgriAssist enhances agricultural decision-making using AI, **breaking language barriers with voice-enabled assistance** to make smart farming accessible to all.  
 
 ---
 
 ## 💡 Key Features  
 
 ### 1️⃣ **Crop Disease Detection**  
-🔍 Farmers can upload an image of their crop to detect diseases using AI-powered image classification (MobileNetV2).  
+🔍 Farmers can upload an image of their crop to detect diseases using AI-powered image classification (**MobileNetV2**).  
 
-### 2️⃣ **Multilingual AI Chatbot**  
-🗣️ Provides farming-related guidance in **Hindi, English, and Bengali**, ensuring accessibility for diverse users.  
+### 2️⃣ **Voice-Enabled Multilingual AI Chatbot**  
+🎙️ Farmers can interact via **text or voice** in **Hindi, English, and Bengali**, making farming guidance more accessible.  
 
 ### 3️⃣ **AI-Powered Yield Predictor**  
 📊 Predicts:  
@@ -42,21 +42,21 @@ AgriAssist enhances agricultural decision-making with technology, ensuring susta
    - **Current location**  
 
 ### 4️⃣ **Farmer’s Marketplace**  
-🛒 A dedicated platform where farmers can list their crops for sale, enabling direct transactions with buyers.  
+🛒 A dedicated platform where farmers can **list and sell crops**, enabling direct transactions with buyers.  
 
 ### 5️⃣ **Pest Control Advisor**  
-🐛 Inputs: **Crop type, pest, severity**  
-🌾 Outputs: **Recommended pest control methods (organic & chemical), application schedule**  
+🐛 **Inputs:** Crop type, pest, severity  
+🌾 **Outputs:** Recommended **organic and chemical pest control solutions** with an **application schedule**.  
 
 ---
 
 ## 🛠️ Technologies Used  
 
-- **Backend:** Python (Flask/FastAPI)  
+- **Backend:** Python (Flask) 
 - **Frontend:** React.js, Tailwind CSS  
 - **AI Models:** MobileNetV2 (Crop Disease Detection)
-- **Chatbot:** Multilingual gemini API 
-- **Database:** Supabase for authentication 
+- **Chatbot:** **Multilingual gemini API with voice support (Hindi, English, Bengali)**  
+- **Database:**supabase for authentication 
 - **Deployment:**  Vercel for frontend, Render for backend  
 
 ---
@@ -64,9 +64,9 @@ AgriAssist enhances agricultural decision-making with technology, ensuring susta
 ## ⚙️ How It Works  
 
 1️⃣ **Upload Crop Image** – AI analyzes and detects diseases.  
-2️⃣ **Consult Chatbot** – Get farming advice in your preferred language.  
+2️⃣ **Consult Chatbot (Voice & Text)** – Get farming advice in your preferred language.  
 3️⃣ **Predict Yield** – Enter crop details to receive AI-driven insights.  
-4️⃣ **Manage Pests** – Receive control solutions based on pest severity.  
+4️⃣ **Manage Pests** – Receive pest control solutions based on severity.  
 5️⃣ **Sell Crops Online** – Farmers list and sell their produce via the marketplace.  
 
 ---
@@ -80,3 +80,4 @@ AgriAssist enhances agricultural decision-making with technology, ensuring susta
 📌 **IEMHacks 3.0 Submission** 🎯  
 
 🚀 *AgriAssist empowers farmers with AI-driven insights, ensuring smarter farming decisions and a more profitable agricultural ecosystem!* 🌾🚜  
+
