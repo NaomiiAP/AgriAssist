@@ -2,6 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Globe, Mic, Volume2, VolumeX, MessageSquare } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
+// Add type definitions for Web Speech API
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+  }
+}
+
 interface Language {
   code: string;
   name: string;
@@ -60,7 +67,7 @@ export default function Chatbot() {
         throw new Error('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.');
       }
 
-      recognitionRef.current = new webkitSpeechRecognition();
+      recognitionRef.current = new (window as any).webkitSpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = selectedLanguage === 'hi' ? 'hi-IN' : 
@@ -99,23 +106,70 @@ export default function Chatbot() {
   };
 
   const speakMessage = (text: string) => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
+    // Clean the text for speech
+    const cleanText = text
+      .replace(/\*\*/g, '') // Remove bold markers
+      .replace(/\*/g, '') // Remove italic markers
+      .replace(/#{1,6}\s/g, '') // Remove headers
+      .replace(/`/g, '') // Remove code blocks
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Replace links with their text
+      .replace(/[-*+]\s/g, '') // Remove list markers
+      .replace(/\n/g, ' ') // Replace newlines with spaces
+      .replace(/\s+/g, ' ') // Remove extra spaces
+      .trim();
+
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    
+    // Set language based on selected language
+    if (selectedLanguage === 'hi') {
+      utterance.lang = 'hi-IN';
+      // For Hindi, speak the entire text at once with specific settings
+      utterance.text = cleanText;
+      utterance.rate = 0.8; // Slower rate for better Hindi pronunciation
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      // Add event handlers for Hindi speech
+      utterance.onend = () => {
+        setIsSpeaking(false);
+      };
+      
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+        setIsSpeaking(false);
+      };
+
+      // Force continuous speech for Hindi
+      utterance.onboundary = (event) => {
+        if (event.name === 'sentence') {
+          // Prevent stopping at sentence boundaries
+          window.speechSynthesis.resume();
+        }
+      };
+    } else if (selectedLanguage === 'bn') {
+      utterance.lang = 'bn-IN';
+      utterance.text = cleanText;
+      utterance.rate = 0.8;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+    } else {
+      utterance.lang = 'en-US';
+      // For English, split into sentences for better natural pauses
+      const sentences = cleanText.split(/([.!?]+)/).filter(Boolean);
+      utterance.text = sentences.join(' ');
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
     }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = selectedLanguage === 'hi' ? 'hi-IN' : 
-                     selectedLanguage === 'bn' ? 'bn-IN' : 'en-US';
-    
-    utterance.onend = () => {
-      setIsSpeaking(false);
-    };
-
-    speechSynthesisRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    // Set speaking state
     setIsSpeaking(true);
+    
+    // Speak the text
+    window.speechSynthesis.speak(utterance);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -153,9 +207,10 @@ export default function Chatbot() {
       setMessages(prev => [...prev, { text: data.response, isUser: false }]);
     } catch (error) {
       console.error('Error details:', error);
-      setError(error instanceof Error ? error.message : 'Failed to connect to the server');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to connect to the server';
+      setError(errorMessage);
       setMessages(prev => [...prev, {
-        text: `Error: ${error instanceof Error ? error.message : 'Failed to connect to the server'}`,
+        text: `Error: ${errorMessage}`,
         isUser: false
       }]);
     } finally {

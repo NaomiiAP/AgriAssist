@@ -104,20 +104,47 @@ export default function Marketplace() {
     }
   };
 
-  const addCrop = () => {
+  const addCrop = async () => {
     if (!newCrop.crop || !newCrop.quantity || !newCrop.price || !newCrop.location) {
       alert('Please fill in all required fields');
       return;
     }
 
-    const newCropWithId = {
-      ...newCrop,
-      id: Date.now(),
-      image: newCrop.image || "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80"
-    } as Crop;
+    try {
+      // Extract numeric value from price string (remove ₹ symbol and any non-numeric characters)
+      const priceValue = parseFloat(newCrop.price.replace(/[^0-9.]/g, ''));
 
-    setCrops(prev => [...prev, newCropWithId]);
-    resetForm();
+      const backendData = {
+        name: newCrop.crop,
+        description: `${newCrop.quantity} available at ${newCrop.location}`,
+        price: priceValue,
+        category: "crops",
+        seller: newCrop.location
+      };
+
+      const response = await axios.post<ApiResponse>(`${import.meta.env.VITE_BACKEND_URL}/marketplace/items`, backendData);
+      
+      if (response.data.status === 'success' && response.data.item) {
+        const newItem = response.data.item;
+        const transformedCrop = {
+          id: newItem.id,
+          crop: newItem.name,
+          quantity: newCrop.quantity,
+          price: `₹${newItem.price}`,
+          location: newItem.seller,
+          delivery: newCrop.delivery || "Available",
+          image: newCrop.image || "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80"
+        };
+        
+        setCrops(prev => [...prev, transformedCrop]);
+        resetForm();
+      } else {
+        throw new Error('Failed to add crop');
+      }
+    } catch (err) {
+      console.error('Error adding crop:', err);
+      setError(err instanceof Error ? err.message : "Failed to add crop");
+    }
   };
 
   const resetForm = () => {
@@ -142,21 +169,54 @@ export default function Marketplace() {
     if (!editListing) return;
 
     try {
+      // Extract numeric value from price string (remove ₹ symbol and any non-numeric characters)
+      const priceValue = parseFloat(editListing.price.replace(/[^0-9.]/g, ''));
+
       const backendData = {
         name: editListing.crop,
         description: `${editListing.quantity} available at ${editListing.location}`,
-        price: parseFloat(editListing.price.replace('₹', '')),
+        price: priceValue,
         category: "crops",
         seller: editListing.location
       };
 
-      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/marketplace/items/${editListing.id}`, backendData);
+      console.log('Sending update request:', backendData);
+      const response = await axios.put<ApiResponse>(`${import.meta.env.VITE_BACKEND_URL}/marketplace/items/${editListing.id}`, backendData);
       
-      setCrops(crops.map((crop) => (crop.id === editListing.id ? editListing : crop)));
-      setEditListing(null);
+      if (response.data.status === 'success' && response.data.item) {
+        // Update the local state with the edited listing
+        setCrops(crops.map((crop) => 
+          crop.id === editListing.id 
+            ? {
+                ...crop,
+                price: `₹${priceValue}`,
+                quantity: editListing.quantity
+              }
+            : crop
+        ));
+        setEditListing(null);
+      } else {
+        throw new Error(response.data.message || 'Failed to update crop details');
+      }
     } catch (err) {
       console.error('Error updating crop:', err);
-      setError("Failed to update crop details");
+      setError(err instanceof Error ? err.message : "Failed to update crop details");
+    }
+  };
+
+  const deleteCrop = async (id: number) => {
+    try {
+      const response = await axios.delete<ApiResponse>(`${import.meta.env.VITE_BACKEND_URL}/marketplace/items/${id}`);
+      
+      if (response.data.status === 'success') {
+        // Remove the crop from the local state
+        setCrops(prev => prev.filter(crop => crop.id !== id));
+      } else {
+        throw new Error(response.data.message || 'Failed to delete crop');
+      }
+    } catch (err) {
+      console.error('Error deleting crop:', err);
+      setError(err instanceof Error ? err.message : "Failed to delete crop");
     }
   };
 
@@ -211,7 +271,15 @@ export default function Marketplace() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCrops.map((listing) => (
             <div key={listing.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <img src={listing.image} alt={listing.crop} className="w-full h-48 object-cover" />
+              <div className="relative">
+                <img src={listing.image} alt={listing.crop} className="w-full h-48 object-cover" />
+                <button
+                  onClick={() => deleteCrop(listing.id)}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">{listing.crop}</h3>
                 <div className="space-y-3">
@@ -247,7 +315,7 @@ export default function Marketplace() {
                       value={editListing.price}
                       onChange={handleEditChange}
                       className="border p-2 rounded w-full"
-                      placeholder="New Price"
+                      placeholder="New Price (e.g., ₹200/kg)"
                     />
                     <input
                       type="text"
@@ -255,14 +323,22 @@ export default function Marketplace() {
                       value={editListing.quantity}
                       onChange={handleEditChange}
                       className="border p-2 rounded w-full"
-                      placeholder="New Quantity"
+                      placeholder="New Quantity (e.g., 500 kg)"
                     />
-                    <button
-                      onClick={saveEdit}
-                      className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
-                    >
-                      Save Changes
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={saveEdit}
+                        className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+                      >
+                        Save Changes
+                      </button>
+                      <button
+                        onClick={() => setEditListing(null)}
+                        className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
